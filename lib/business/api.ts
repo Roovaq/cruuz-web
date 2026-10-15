@@ -96,7 +96,7 @@ function getErrorMessage(
   );
 }
 
-async function businessRequest<T>(
+export async function businessRequest<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {

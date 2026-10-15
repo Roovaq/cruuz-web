@@ -1,5 +1,6 @@
 "use client";
 
+import { CompanyTravelWorkspace,CompanyBillingWorkspace,CompanyPoliciesWorkspace } from "./CompanyTravelWorkspace";
 import {
   Building2,
   CarFront,
@@ -14,7 +15,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect,useState } from "react";
 
 import Navbar from "@/components/layout/Navbar";
 import { BusinessDepartmentForm } from "@/components/business/management/forms/BusinessDepartmentForm";
@@ -66,19 +67,19 @@ const navigation: Array<{
     id: "travel",
     label: "Company travel",
     icon: CarFront,
-    available: false,
+    available: true,
   },
   {
     id: "billing",
     label: "Billing",
     icon: CircleDollarSign,
-    available: false,
+    available: true,
   },
   {
     id: "policies",
     label: "Ride policies",
     icon: ShieldCheck,
-    available: false,
+    available: true,
   },
 ];
 
@@ -88,6 +89,7 @@ export function BusinessDashboardWorkspace() {
 
   const [section, setSection] =
     useState<BusinessSection>("overview");
+  useEffect(()=>{const p=new URLSearchParams(window.location.search);if(p.has("reference")||p.has("trxref"))setSection("billing");},[]);
 
   const [departmentDialogOpen, setDepartmentDialogOpen] =
     useState(false);
@@ -253,7 +255,7 @@ export function BusinessDashboardWorkspace() {
       <div className="mt-7 grid gap-7 lg:grid-cols-[240px_minmax(0,1fr)]">
         <aside>
           <nav className="flex gap-2 overflow-x-auto pb-2 lg:sticky lg:top-28 lg:flex-col lg:overflow-visible">
-            {navigation.map((item) => {
+            {navigation.filter(item=>item.id!=='billing'||['OWNER','ADMIN'].includes(membership.role)||membership.canViewBilling).map((item) => {
               const Icon = item.icon;
               const active = item.id === section;
               const disabled =
@@ -286,6 +288,10 @@ export function BusinessDashboardWorkspace() {
         </aside>
 
         <section className="min-w-0">
+          {section==='travel'&&operational&&<CompanyTravelWorkspace context={workspace.context} costCentres={workspace.costCentres} members={workspace.members}/>}
+          {section==='billing'&&operational&&<CompanyBillingWorkspace context={workspace.context}/>}
+          {section==='policies'&&operational&&<CompanyPoliciesWorkspace context={workspace.context} costCentres={workspace.costCentres} departments={workspace.departments}/>}
+
           {section === "overview" && (
             <Overview
               accountName={
