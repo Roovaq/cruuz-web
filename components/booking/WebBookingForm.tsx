@@ -92,6 +92,7 @@ type PricingEstimate = {
   totalFare: number;
   formattedFare: string;
   etaMinutes: number;
+  hourlyPackage?:{hours:number;vehicle:string;tariffVersion:string};
 };
 
 type AutomaticCampaignValidation = {
@@ -509,6 +510,11 @@ const [
   const [accessNotes, setAccessNotes] = useState("");
 
   const [hourlyHours, setHourlyHours] = useState("1");
+  const [hourlyVehicle,setHourlyVehicle]=useState('GO');
+  const [hourlyPolicy,setHourlyPolicy]=useState<{enabled:boolean;vehicles:Array<{vehicle:string;rate:number;terms:string}>}|null>(null);
+  const [hourlyFare,setHourlyFare]=useState<PricingEstimate|null>(null),[hourlyError,setHourlyError]=useState('');
+  useEffect(()=>{let active=true;fetch(`${CRUUZ_API_URL}/pricing/hourly`).then(r=>r.json()).then(data=>{if(!active)return;setHourlyPolicy(data.policy);if(data.policy?.vehicles?.length&&!data.policy.vehicles.some((v:{vehicle:string})=>v.vehicle==='GO'))setHourlyVehicle(data.policy.vehicles[0].vehicle);}).catch(()=>{if(active)setHourlyError('Could not load Hourly availability.');});return()=>{active=false;};},[]);
+  useEffect(()=>{if(rideType!=='HOURLY')return;const controller=new AbortController();setHourlyFare(null);setHourlyError('');void fetch(`${CRUUZ_API_URL}/pricing/estimate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({rideTypeId:'HOURLY',hourlyHours:Number(hourlyHours),hourlyVehicle}),signal:controller.signal}).then(async r=>{const data=await r.json();if(!r.ok)throw new Error(data.message);return data.estimate;}).then(quote=>setHourlyFare(quote)).catch(error=>{if(!controller.signal.aborted)setHourlyError(error.message||'Hourly quote unavailable.');});return()=>controller.abort();},[rideType,hourlyHours,hourlyVehicle]);
 
   const [message, setMessage] = useState<string | null>(
     null
@@ -518,6 +524,7 @@ const [
     PRICING_TYPE_MAP[rideType];
 
   const selectedFare = useMemo(() => {
+    if(rideType==="HOURLY")return hourlyFare?.hourlyPackage?.hours===Number(hourlyHours)&&hourlyFare.hourlyPackage.vehicle===hourlyVehicle?hourlyFare:null;
     if (!selectedPricingId) return null;
 
     return (
@@ -526,7 +533,7 @@ const [
           item.rideTypeId === selectedPricingId
       ) || null
     );
-  }, [pricing, selectedPricingId]);
+  }, [pricing, selectedPricingId,rideType,hourlyFare,hourlyHours,hourlyVehicle]);
 
   useEffect(() => {
     if (!GOOGLE_MAPS_WEB_KEY || !mapContainerRef.current) {
@@ -1511,7 +1518,7 @@ const [
         return;
       }
 
-      const token = localStorage.getItem("cruuz_web_token");
+      const token = accessToken;
       if (!token) return;
 
       async function loadAutomaticBenefit() {
@@ -1563,7 +1570,7 @@ const [
       window.clearTimeout(timeout);
       controller.abort();
     };
-  }, [selectedFare, selectedPricingId]);
+  }, [selectedFare, selectedPricingId,accessToken]);
 
   async function apiRequest<T>(
     path: string,
@@ -1695,7 +1702,7 @@ const [
   }
 
   async function createTrip(paymentReference?: string) {
-    if (!pickup || !destination || !routeInfo || !selectedPricingId) {
+    if (!pickup || (rideType!=="HOURLY"&&(!destination||!routeInfo)) || !selectedPricingId) {
       throw new Error("Complete the route and ride selection first.");
     }
 
@@ -1707,9 +1714,8 @@ const [
           pickupAddress: pickup.address || pickup.name,
           pickupLat: pickup.latitude,
           pickupLng: pickup.longitude,
-          dropoffAddress: destination.address || destination.name,
-          dropoffLat: destination.latitude,
-          dropoffLng: destination.longitude,
+          dropoffAddress:destination?.address||destination?.name||"",dropoffLat:destination?.latitude??pickup.latitude,dropoffLng:destination?.longitude??pickup.longitude,
+          hourlyHours:rideType==="HOURLY"?Number(hourlyHours):undefined,hourlyVehicle:rideType==="HOURLY"?hourlyVehicle:undefined,hourlyTariffVersion:selectedFare?.hourlyPackage?.tariffVersion,
           stops: stops.map((stop) => ({
             stopAddress: stop.place?.address || stop.place?.name,
             stopLat: stop.place?.latitude,
@@ -1718,8 +1724,8 @@ const [
           rideTypeId: selectedPricingId,
           paymentMethod,
           paymentReference: paymentReference || undefined,
-          distanceKm: routeInfo.distanceKm,
-          durationMinutes: routeInfo.durationMinutes,
+          distanceKm: routeInfo?.distanceKm??0,
+          durationMinutes: routeInfo?.durationMinutes??0,
         }),
       },
       accessToken
@@ -1742,10 +1748,14 @@ const [
       throw new Error("A valid fare is required before payment.");
     }
 
-    const paymentAmount = automaticBenefit?.valid
+    let paymentAmount = automaticBenefit?.valid
       ? automaticBenefit.finalFare
       : selectedFare.totalFare;
 
+    if(rideType==='HOURLY'){
+      const preview=await apiRequest<{validation?:AutomaticCampaignValidation}>('/campaigns/automatic-preview',{method:'POST',body:JSON.stringify({originalFare:selectedFare.totalFare,rideTypeId:'HOURLY'})},accessToken);
+      paymentAmount=preview.validation?.valid?preview.validation.finalFare:selectedFare.totalFare;
+    }
     const result = await apiRequest<{
       authorizationUrl?: string;
       checkoutUrl?: string;
@@ -1783,9 +1793,8 @@ const [
         pickupAddress: pickup!.address || pickup!.name,
         pickupLat: pickup!.latitude,
         pickupLng: pickup!.longitude,
-        dropoffAddress: destination!.address || destination!.name,
-        dropoffLat: destination!.latitude,
-        dropoffLng: destination!.longitude,
+        dropoffAddress:destination?.address||destination?.name||"",dropoffLat:destination?.latitude??pickup!.latitude,dropoffLng:destination?.longitude??pickup!.longitude,
+        hourlyHours:rideType==="HOURLY"?Number(hourlyHours):undefined,hourlyVehicle:rideType==="HOURLY"?hourlyVehicle:undefined,hourlyTariffVersion:selectedFare?.hourlyPackage?.tariffVersion,
         stops: stops.map((stop) => ({
           stopAddress: stop.place!.address || stop.place!.name,
           stopLat: stop.place!.latitude,
@@ -1793,8 +1802,8 @@ const [
         })),
         rideTypeId: selectedPricingId!,
         paymentMethod,
-        distanceKm: routeInfo!.distanceKm,
-        durationMinutes: routeInfo!.durationMinutes,
+        distanceKm: routeInfo?.distanceKm??0,
+        durationMinutes: routeInfo?.durationMinutes??0,
       },
     });
 
@@ -1830,9 +1839,9 @@ const [
     event.preventDefault();
     setMessage(null);
 
-    if (!pickup || !destination) {
+    if (!pickup || (rideType!=="HOURLY"&&!destination)) {
       setMessage(
-        "Select a valid pickup and destination."
+        rideType==="HOURLY"?"Select a valid pickup. Destination is optional.":"Select a valid pickup and destination."
       );
       return;
     }
@@ -2065,7 +2074,7 @@ const [
             )}
 
             <LocationInput
-              label="Destination"
+              label={rideType==="HOURLY"?"Destination (optional)":"Destination"}
               value={destinationText}
               onChange={(value) => {
                 setDestinationText(value);
@@ -2200,7 +2209,7 @@ const [
                   type="button"
                   key={item.id}
                   onClick={() =>
-                    setRideType(item.id)
+                    item.id==="BUSINESS"?window.location.assign("/business/dashboard"):setRideType(item.id)
                   }
                   className={[
                     "rounded-2xl border p-4 text-left transition",
@@ -2447,6 +2456,11 @@ const [
               Hourly booking
             </h2>
 
+            <p className="mt-3 text-sm text-slate-300">Pickup is required; destination is optional. Book 1–12 whole hours. Time starts when the driver verifies your PIN and starts the ride. Waiting at stops counts toward time. No automatic overtime charge.</p>
+            <label className="mt-4 block">Vehicle<select className="ml-3 rounded-xl bg-slate-800 p-3" value={hourlyVehicle} onChange={e=>setHourlyVehicle(e.target.value)}>{(hourlyPolicy?.vehicles||[]).map(v=><option key={v.vehicle} value={v.vehicle}>{v.vehicle}</option>)}</select></label>
+            <p className="mt-3 text-sm text-slate-300">{hourlyPolicy?.vehicles.find(v=>v.vehicle===hourlyVehicle)?.terms}</p>
+            {hourlyError&&<p role="status" className="mt-3 text-amber-300">{hourlyError}</p>}
+            {!hourlyPolicy?.enabled&&<p className="mt-3 text-amber-300">Hourly bookings are awaiting tariff approval.</p>}
             <div className="mt-5 max-w-xs">
               <TextInput
                 label="Number of hours"

@@ -22,6 +22,7 @@ export type PendingWebPaidBooking = {
       stopLng: number;
     }>;
     rideTypeId: string;
+    hourlyHours?:number;hourlyVehicle?:string;hourlyTariffVersion?:string;
     paymentMethod: string;
     distanceKm: number;
     durationMinutes: number;
@@ -50,7 +51,7 @@ export function getPendingWebPaidBooking(): PendingWebPaidBooking | null {
     if (
       !value.reference ||
       !value.tripRequest?.pickupAddress ||
-      !value.tripRequest?.dropoffAddress ||
+      (!value.tripRequest?.dropoffAddress&&value.tripRequest?.rideTypeId!=="HOURLY") ||
       !Number.isFinite(createdAt) ||
       Date.now() - createdAt > MAX_PENDING_AGE_MS
     ) {
