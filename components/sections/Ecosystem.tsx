@@ -24,7 +24,7 @@ const items = [
     image: assets.screenshots.business,
   },
   {
-    title: "Nexaro Ops",
+    title: "Roovaq Ops",
     text: "Live operations, safety, dispatch and platform intelligence.",
     image: assets.screenshots.ops,
   },

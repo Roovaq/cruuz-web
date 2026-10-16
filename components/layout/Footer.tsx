@@ -159,7 +159,7 @@ export default function Footer() {
             <div className="text-xs text-slate-500">
               Powered by{" "}
               <span className="font-bold text-violet-400">
-                Nexaro
+                Roovaq
               </span>
             </div>
           </div>

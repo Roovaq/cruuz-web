@@ -25,5 +25,5 @@ export const company = {
     },
   ],
 
-  poweredBy: "Nexaro",
+  poweredBy: "Roovaq",
 };

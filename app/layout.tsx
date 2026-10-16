@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     "CRUUZ is a technology-powered mobility platform connecting riders, drivers, and businesses through safe, reliable, and intelligent transportation services.",
   keywords: [
     "CRUUZ",
-    "Nexaro",
+    "Roovaq",
     "ride hailing",
     "mobility platform",
     "transportation",
