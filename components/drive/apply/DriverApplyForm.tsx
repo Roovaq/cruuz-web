@@ -325,7 +325,7 @@ export default function DriverApplyForm() {
             <p className="font-black text-yellow-300">Next after submission</p>
 
             <p className="mt-2 text-sm leading-6 text-yellow-100/90">
-              Your profile will enter Nexaro Ops as PENDING. You will still need
+              Your profile will enter Roovaq Ops as PENDING. You will still need
               to complete compliance documents such as Driver License,
               Insurance, Roadworthy, Vehicle Photo, Profile Photo, Selfie
               Verification and Ghana Card before approval.

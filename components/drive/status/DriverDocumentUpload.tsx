@@ -194,7 +194,7 @@ export default function DriverDocumentUpload({
       setGhanaCardNumber("");
 
       showMessage(
-        `${label} uploaded successfully. Waiting for Nexaro Ops review.`,
+        `${label} uploaded successfully. Waiting for Roovaq Ops review.`,
         "success"
       );
 
