@@ -161,13 +161,13 @@ export default function Hero() {
         </div>
 
         {/* Right visual */}
-        <div className="relative hidden min-h-[590px] lg:block">
+        <div className="relative min-h-[240px] w-full sm:min-h-[330px] lg:min-h-[590px]">
           {/* Launch badge */}
           <motion.div
             initial={{ opacity: 0, y: -15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
-            className="absolute right-8 top-12 z-20 rounded-full border border-white/10 bg-white/10 px-5 py-3 text-sm font-black backdrop-blur-xl"
+            className="absolute right-8 top-12 z-20 hidden rounded-full lg:block border border-white/10 bg-white/10 px-5 py-3 text-sm font-black backdrop-blur-xl"
           >
             Built for Africa. Ready for the World.
           </motion.div>
@@ -189,7 +189,7 @@ export default function Hero() {
                 ease: "easeInOut",
               },
             }}
-            className="absolute right-2 top-[125px] z-30 w-[235px] rounded-[1.6rem] border border-white/10 bg-[#121b3d]/80 p-4 shadow-2xl backdrop-blur-xl"
+            className="absolute right-2 top-[125px] z-30 hidden w-[235px] lg:block rounded-[1.6rem] border border-white/10 bg-[#121b3d]/80 p-4 shadow-2xl backdrop-blur-xl"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -241,7 +241,7 @@ export default function Hero() {
               ease: "easeInOut",
               delay: 1,
             }}
-            className="absolute left-5 top-[230px] z-30 rounded-2xl border border-white/10 bg-[#121b3d]/75 px-4 py-3 shadow-xl backdrop-blur-xl"
+            className="absolute left-5 top-[230px] z-30 hidden rounded-2xl lg:block border border-white/10 bg-[#121b3d]/75 px-4 py-3 shadow-xl backdrop-blur-xl"
           >
             <div className="flex items-center gap-3">
               <div className="rounded-xl bg-green-400/15 p-2">
@@ -268,7 +268,7 @@ export default function Hero() {
               ease: "easeInOut",
               delay: 0.5,
             }}
-            className="absolute bottom-[215px] right-[40px] z-30 rounded-2xl border border-white/10 bg-[#121b3d]/75 px-4 py-3 shadow-xl backdrop-blur-xl"
+            className="absolute bottom-[215px] right-[40px] z-30 hidden rounded-2xl lg:block border border-white/10 bg-[#121b3d]/75 px-4 py-3 shadow-xl backdrop-blur-xl"
           >
             <div className="flex items-center gap-3">
               <CheckCircle2 className="h-5 w-5 text-green-300" />
@@ -284,7 +284,7 @@ export default function Hero() {
 
           {/* Moving road glow */}
           <motion.div
-            className="absolute bottom-8 right-0 h-[190px] w-[680px] overflow-hidden rounded-[3rem] opacity-60"
+            className="absolute bottom-8 right-0 hidden h-[190px] w-[680px] lg:block overflow-hidden rounded-[3rem] opacity-60"
             animate={{
               x: [0, -18, 0],
               opacity: [0.45, 0.7, 0.45],
@@ -305,7 +305,7 @@ export default function Hero() {
 
           {/* Road streak */}
           <motion.div
-            className="absolute bottom-[118px] right-0 h-[2px] w-[560px] bg-gradient-to-r from-transparent via-violet-300/70 to-transparent blur-[1px]"
+            className="absolute bottom-[118px] right-0 hidden h-[2px] w-[560px] lg:block bg-gradient-to-r from-transparent via-violet-300/70 to-transparent blur-[1px]"
             animate={{
               x: [160, -220],
               opacity: [0, 1, 0],
@@ -319,7 +319,7 @@ export default function Hero() {
 
           {/* Animated vehicle */}
 <motion.div
-  className="absolute bottom-4 right-0 h-[380px] w-[760px]"
+  className="absolute bottom-0 left-1/2 h-[220px] w-[min(100%,420px)] -translate-x-1/2 sm:h-[300px] sm:w-[min(100%,560px)] lg:bottom-4 lg:left-auto lg:right-0 lg:h-[380px] lg:w-[760px] lg:translate-x-0"
   initial={{ x: 120, y: 0, opacity: 0 }}
   animate={{
     x: [120, 0, -55, -20, 0],
