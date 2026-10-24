@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useRef, useState, type FormEvent} from "react";
+import {useEffect, useState, type FormEvent} from "react";
 import Link from "next/link";
 import {acceptInvitationWithPassword, tokenFromFragment} from "@/lib/business/invitation";
 
@@ -12,16 +12,17 @@ export default function BusinessInvitationPage() {
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [accepted, setAccepted] = useState(false);
-  const loaded = useRef(false);
   useEffect(() => {
-    if (loaded.current) return;
-    loaded.current = true;
-    try { setToken(tokenFromFragment(window.location.hash)); }
-    catch (failure) { setError(failure instanceof Error ? failure.message : "Invalid invitation link."); }
-    finally {
-      window.history.replaceState(window.history.state, "", window.location.pathname);
-      setReady(true);
-    }
+    // Read the one-time fragment outside the effect body to avoid cascading renders.
+    const load = () => {
+      try { setToken(tokenFromFragment(window.location.hash)); }
+      catch (failure) { setError(failure instanceof Error ? failure.message : "Invalid invitation link."); }
+      finally {
+        window.history.replaceState(window.history.state, "", window.location.pathname);
+        setReady(true);
+      }
+    };
+    queueMicrotask(load);
   }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
