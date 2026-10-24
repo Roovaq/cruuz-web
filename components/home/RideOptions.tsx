@@ -14,9 +14,11 @@ export default function RideOptions() {
     const slider = sliderRef.current;
     if (!slider) return;
 
-    const cardWidth = 340;
+    const card = slider.children.item(index) as HTMLElement | null;
+    if (!card) return;
+
     slider.scrollTo({
-      left: index * cardWidth,
+      left: card.offsetLeft - slider.offsetLeft,
       behavior: "smooth",
     });
 
