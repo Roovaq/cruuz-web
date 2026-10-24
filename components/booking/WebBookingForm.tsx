@@ -385,7 +385,9 @@ const rideTypes: Array<{
 export default function WebBookingForm() {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<GoogleMapInstance | null>(null);
-  const [mapError, setMapError] = useState<string | null>(null);
+  const [mapError, setMapError] = useState<string | null>(
+    GOOGLE_MAPS_WEB_KEY ? null : "The booking map is not configured. Please contact CRUUZ support."
+  );
   const [mapAttempt, setMapAttempt] = useState(0);
 
   const pickupMarkerRef =
@@ -546,11 +548,7 @@ const [
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
-    if (!GOOGLE_MAPS_WEB_KEY) {
-      setMapError("The booking map is not configured. Please contact CRUUZ support.");
-      return;
-    }
-    setMapError(null);
+    if (!GOOGLE_MAPS_WEB_KEY) return;
 
     let active = true;
     const stopMarkers = stopMarkerRefs.current;
