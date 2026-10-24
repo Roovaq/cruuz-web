@@ -73,7 +73,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.08 }}
-            className="whitespace-nowrap text-3xl font-black leading-tight tracking-tight sm:text-4xl lg:text-5xl"
+            className="text-balance break-words text-3xl font-black leading-tight tracking-tight sm:text-4xl lg:text-5xl"
           >
             A better way{" "}
             <span className="bg-gradient-to-r from-violet-200 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent">
