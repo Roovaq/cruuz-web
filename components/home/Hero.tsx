@@ -317,9 +317,21 @@ export default function Hero() {
             }}
           />
 
+          {/* Mobile vehicle: normal document flow prevents clipping on narrow screens. */}
+          <div className="relative z-10 mx-auto h-[220px] w-full max-w-[440px] sm:h-[300px] lg:hidden">
+            <Image
+              src={assets.vehicles.executive}
+              alt="CRUUZ Executive vehicle"
+              fill
+              priority
+              sizes="(max-width: 640px) 100vw, 440px"
+              className="object-contain object-center drop-shadow-2xl"
+            />
+          </div>
+
           {/* Animated vehicle */}
 <motion.div
-  className="absolute inset-x-0 bottom-0 z-10 h-[230px] w-full sm:h-[300px] lg:inset-x-auto lg:bottom-4 lg:right-0 lg:h-[380px] lg:w-[760px]"
+  className="absolute bottom-4 right-0 z-10 hidden h-[380px] w-[760px] lg:block"
   initial={false}
   animate={{
     x: [0, -12, 0],
