@@ -89,7 +89,7 @@ export function BusinessDashboardWorkspace() {
 
   const [section, setSection] =
     useState<BusinessSection>("overview");
-  useEffect(()=>{const p=new URLSearchParams(window.location.search);if(p.has("reference")||p.has("trxref"))setSection("billing");},[]);
+  useEffect(()=>{const p=new URLSearchParams(window.location.search);if(p.has("reference")||p.has("trxref"))queueMicrotask(()=>setSection("billing"));},[]);
 
   const [departmentDialogOpen, setDepartmentDialogOpen] =
     useState(false);
