@@ -317,15 +317,18 @@ export default function Hero() {
             }}
           />
 
-          {/* Mobile vehicle: normal document flow prevents clipping on narrow screens. */}
-          <div className="relative z-10 mx-auto h-[220px] w-full max-w-[440px] sm:h-[300px] lg:hidden">
-            <Image
+          {/* Mobile vehicle: use the verified public asset directly, without
+              Next.js image optimization or absolute fill positioning. */}
+          <div className="relative z-20 mx-auto block w-full max-w-[440px] lg:hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={assets.vehicles.executive}
               alt="CRUUZ Executive vehicle"
-              fill
-              priority
-              sizes="(max-width: 640px) 100vw, 440px"
-              className="object-contain object-center drop-shadow-2xl"
+              width={880}
+              height={500}
+              loading="eager"
+              decoding="async"
+              className="block h-auto w-full object-contain drop-shadow-2xl"
             />
           </div>
 
