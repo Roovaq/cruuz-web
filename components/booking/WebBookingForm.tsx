@@ -266,24 +266,31 @@ function loadGoogleMaps(): Promise<void> {
     return browserWindow.__cruuzGoogleMapsPromise;
   }
 
-  browserWindow.__cruuzGoogleMapsPromise = new Promise(
-    (resolve, reject) => {
-      const script = document.createElement("script");
-      script.id = "cruuz-google-maps";
-      script.src =
-        "https://maps.googleapis.com/maps/api/js?" +
-        new URLSearchParams({
-          key: GOOGLE_MAPS_WEB_KEY,
-          v: "weekly",
-        }).toString();
-      script.async = true;
-      script.defer = true;
-      script.onload = () => resolve();
-      script.onerror = () =>
-        reject(new Error("Google Maps failed to load"));
-      document.head.appendChild(script);
-    }
-  );
+  browserWindow.__cruuzGoogleMapsPromise = new Promise<void>((resolve, reject) => {
+    const script = document.createElement("script");
+    script.id = "cruuz-google-maps";
+    script.src = "https://maps.googleapis.com/maps/api/js?" +
+      new URLSearchParams({ key: GOOGLE_MAPS_WEB_KEY, v: "weekly" }).toString();
+    script.async = true;
+    script.defer = true;
+    const timeout = window.setTimeout(() => {
+      reject(new Error("Google Maps timed out while loading"));
+    }, 15000);
+    script.onload = () => {
+      window.clearTimeout(timeout);
+      if (browserWindow.google?.maps?.Map) resolve();
+      else reject(new Error("Google Maps did not initialize"));
+    };
+    script.onerror = () => {
+      window.clearTimeout(timeout);
+      reject(new Error("Google Maps script could not load"));
+    };
+    document.head.appendChild(script);
+  }).catch((error: unknown) => {
+    browserWindow.__cruuzGoogleMapsPromise = undefined;
+    document.getElementById("cruuz-google-maps")?.remove();
+    throw error;
+  });
 
   return browserWindow.__cruuzGoogleMapsPromise;
 }
@@ -378,6 +385,8 @@ const rideTypes: Array<{
 export default function WebBookingForm() {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<GoogleMapInstance | null>(null);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [mapAttempt, setMapAttempt] = useState(0);
 
   const pickupMarkerRef =
     useRef<GoogleMarkerInstance | null>(null);
@@ -536,9 +545,12 @@ const [
   }, [pricing, selectedPricingId,rideType,hourlyFare,hourlyHours,hourlyVehicle]);
 
   useEffect(() => {
-    if (!GOOGLE_MAPS_WEB_KEY || !mapContainerRef.current) {
+    if (!mapContainerRef.current) return;
+    if (!GOOGLE_MAPS_WEB_KEY) {
+      setMapError("The booking map is not configured. Please contact CRUUZ support.");
       return;
     }
+    setMapError(null);
 
     let active = true;
     const stopMarkers = stopMarkerRefs.current;
@@ -556,6 +568,7 @@ const [
           return;
         }
 
+        try {
         mapRef.current = new browserWindow.google.maps.Map(
           mapContainerRef.current,
           {
@@ -570,12 +583,13 @@ const [
             fullscreenControl: true,
           }
         );
+        } catch {
+          if (active) setMapError("The map could not initialize on this device.");
+        }
       })
       .catch(() => {
         if (active) {
-          setMessage(
-            "Google Maps could not load. Please refresh and try again."
-          );
+          setMapError("Google Maps could not load. Check your connection or browser settings and try again.");
         }
       });
 
@@ -592,7 +606,7 @@ const [
       routePolylineRef.current?.setMap(null);
       mapRef.current = null;
     };
-  }, []);
+  }, [mapAttempt]);
 
 
 
@@ -2111,6 +2125,12 @@ const [
               ref={mapContainerRef}
               className="h-[360px] w-full sm:h-[430px]"
             />
+            {mapError && (
+              <div role="alert" className="px-4 py-5 text-center text-sm text-white">
+                <p>{mapError}</p>
+                <button type="button" onClick={() => setMapAttempt((value) => value + 1)} className="mt-3 rounded-xl bg-violet-600 px-4 py-2 font-semibold text-white">Retry map</button>
+              </div>
+            )}
           </div>
 
           {routeLoading && (
