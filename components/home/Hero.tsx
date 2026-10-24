@@ -319,10 +319,10 @@ export default function Hero() {
 
           {/* Animated vehicle */}
 <motion.div
-  className="absolute bottom-0 left-1/2 h-[220px] w-[min(100%,420px)] -translate-x-1/2 sm:h-[300px] sm:w-[min(100%,560px)] lg:bottom-4 lg:left-auto lg:right-0 lg:h-[380px] lg:w-[760px] lg:translate-x-0"
-  initial={{ x: 120, y: 0, opacity: 0 }}
+  className="absolute bottom-0 left-0 z-10 h-[220px] w-full sm:h-[300px] lg:bottom-4 lg:left-auto lg:right-0 lg:h-[380px] lg:w-[760px]"
+  initial={false}
   animate={{
-    x: [120, 0, -55, -20, 0],
+    x: [0, -12, 0],
     y: [0, 0, -6, -2, 0],
     rotate: [0, 0, -0.35, 0.2, 0],
     opacity: 1,
