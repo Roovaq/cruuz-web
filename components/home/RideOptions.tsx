@@ -9,6 +9,15 @@ export default function RideOptions() {
   const sliderRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(preference.matches);
+    update();
+    preference.addEventListener("change", update);
+    return () => preference.removeEventListener("change", update);
+  }, []);
 
   function scrollToIndex(index: number) {
     const slider = sliderRef.current;
@@ -19,7 +28,7 @@ export default function RideOptions() {
 
     slider.scrollTo({
       left: card.offsetLeft - slider.offsetLeft,
-      behavior: "smooth",
+      behavior: reducedMotion ? "instant" : "smooth",
     });
 
     setActive(index);
@@ -39,7 +48,7 @@ export default function RideOptions() {
   }
 
   useEffect(() => {
-    if (paused) return;
+    if (paused || reducedMotion) return;
 
     const timer = setInterval(() => {
       setActive((current) => {
@@ -50,7 +59,7 @@ export default function RideOptions() {
     }, 5000);
 
     return () => clearInterval(timer);
-  }, [paused]);
+  }, [paused, reducedMotion]);
 
   return (
     <section id="rides" className="px-6 py-14">
@@ -85,7 +94,7 @@ export default function RideOptions() {
         ref={sliderRef}
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
-        className="mx-auto flex max-w-7xl snap-x gap-5 overflow-x-auto scroll-smooth pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="mx-auto flex max-w-7xl snap-x gap-5 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {rides.map((ride) => (
           <RideCard key={ride.name} {...ride} />
