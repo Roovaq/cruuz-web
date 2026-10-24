@@ -16,7 +16,7 @@ import { assets } from "@/lib/assets";
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen overflow-hidden bg-[#101936] px-6 pt-24">
+    <section className="relative overflow-hidden bg-[#101936] px-4 pb-8 pt-20 sm:px-6 lg:min-h-screen lg:pb-0 lg:pt-24">
       {/* Background */}
       <Image
         src={assets.hero.background}
@@ -57,7 +57,7 @@ export default function Hero() {
         }}
       />
 
-      <div className="relative mx-auto grid min-h-[calc(100vh-6rem)] max-w-7xl items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="relative mx-auto grid max-w-7xl items-center gap-4 lg:min-h-[calc(100vh-6rem)] lg:grid-cols-[0.9fr_1.1fr] lg:gap-10">
         {/* Left content */}
         <div className="z-20 max-w-2xl">
           <motion.p
@@ -161,7 +161,7 @@ export default function Hero() {
         </div>
 
         {/* Right visual */}
-        <div className="relative min-h-[240px] w-full sm:min-h-[330px] lg:min-h-[590px]">
+        <div className="relative min-h-[230px] w-full sm:min-h-[330px] lg:min-h-[590px]">
           {/* Launch badge */}
           <motion.div
             initial={{ opacity: 0, y: -15 }}
@@ -319,7 +319,7 @@ export default function Hero() {
 
           {/* Animated vehicle */}
 <motion.div
-  className="absolute bottom-0 left-0 z-10 h-[220px] w-full sm:h-[300px] lg:bottom-4 lg:left-auto lg:right-0 lg:h-[380px] lg:w-[760px]"
+  className="absolute inset-x-0 bottom-0 z-10 h-[230px] w-full sm:h-[300px] lg:inset-x-auto lg:bottom-4 lg:right-0 lg:h-[380px] lg:w-[760px]"
   initial={false}
   animate={{
     x: [0, -12, 0],
