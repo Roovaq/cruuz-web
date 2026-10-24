@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { rides } from "@/lib/rides";
 import RideCard from "./RideCard";
 
@@ -19,7 +19,7 @@ export default function RideOptions() {
     return () => preference.removeEventListener("change", update);
   }, []);
 
-  function scrollToIndex(index: number) {
+  const scrollToIndex = useCallback((index: number) => {
     const slider = sliderRef.current;
     if (!slider) return;
 
@@ -32,7 +32,7 @@ export default function RideOptions() {
     });
 
     setActive(index);
-  }
+  }, [reducedMotion]);
 
   function scrollSlider(direction: "left" | "right") {
     const nextIndex =
@@ -51,15 +51,11 @@ export default function RideOptions() {
     if (paused || reducedMotion) return;
 
     const timer = setInterval(() => {
-      setActive((current) => {
-        const nextIndex = current === rides.length - 1 ? 0 : current + 1;
-        scrollToIndex(nextIndex);
-        return nextIndex;
-      });
+      scrollToIndex((Math.round(sliderRef.current?.scrollLeft ?? 0) / Math.max(sliderRef.current?.clientWidth ?? 1, 1) + 1) % rides.length);
     }, 5000);
 
     return () => clearInterval(timer);
-  }, [paused, reducedMotion]);
+  }, [paused, reducedMotion, scrollToIndex]);
 
   return (
     <section id="rides" className="px-6 py-14">
